@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Video Studio</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: #121a2b;
+        --panel-alt: #1b2540;
+        --text: #edf4ff;
+        --muted: #9bb0d1;
+        --accent: #65d6ff;
+        --accent-strong: #7c6bff;
+        --green: #7be4b2;
+        --danger: #ff7b7b;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        background: linear-gradient(180deg, #09111d 0%, #0b1020 100%);
+        color: var(--text);
+        font-family: Inter, 'Segoe UI', sans-serif;
+      }
+      body { min-height: 100vh; padding: 28px 16px 40px; }
+      .container { max-width: 1200px; margin: 0 auto; }
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 20px;
+        border-radius: 18px;
+        background: rgba(15, 22, 37, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: var(--shadow);
+      }
+      .brand { font-size: 1.2rem; font-weight: 700; letter-spacing: 0.05em; }
+      .pill {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(101, 214, 255, 0.12);
+        color: var(--accent);
+        font-size: 0.8rem;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 1.3fr 0.9fr;
+        gap: 22px;
+        margin-top: 24px;
+      }
+      .card {
+        background: rgba(18, 26, 43, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        box-shadow: var(--shadow);
+      }
+      .panel { padding: 22px; }
+      textarea, input, select, button {
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(10, 15, 25, 0.8);
+        color: var(--text);
+        font-size: 0.98rem;
+      }
+      textarea {
+        min-height: 260px;
+        resize: vertical;
+        padding: 16px;
+        line-height: 1.55;
+      }
+      .field-grid {
+        display: grid;
+        grid-template-columns: 1fr 200px;
+        gap: 16px;
+        margin-top: 18px;
+      }
+      .field { display: flex; flex-direction: column; gap: 8px; }
+      .field label {
+        color: var(--muted);
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      input, select { padding: 12px 14px; outline: none; }
+      button {
+        cursor: pointer;
+        padding: 14px 20px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        border: none;
+        background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+        color: #08111a;
+        transition: transform 0.12s ease, opacity 0.2s ease;
+      }
+      button:hover { transform: translateY(-1px); }
+      button:disabled { opacity: 0.55; cursor: not-allowed; }
+      .actions { display: flex; gap: 12px; margin-top: 18px; }
+      .secondary {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text);
+      }
+      .status-box {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border: 1px solid rgba(101, 214, 255, 0.2);
+        border-radius: 14px;
+        background: rgba(101, 214, 255, 0.06);
+        color: var(--text);
+        display: none;
+      }
+      .status-box.visible { display: block; }
+      .progress-track {
+        margin-top: 16px;
+        height: 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--green), var(--accent));
+        border-radius: inherit;
+        transition: width 0.25s ease;
+      }
+      .scene-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        margin-top: 12px;
+      }
+      .scene-item {
+        padding: 16px;
+        border-radius: 16px;
+        background: rgba(13, 18, 30, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .scene-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+      .scene-number {
+        font-size: 0.8rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      .scene-item textarea { min-height: 72px; font-size: 0.9rem; }
+      .scene-item input { margin-top: 8px; font-size: 0.9rem; }
+      .download-row { margin-top: 18px; display: none; }
+      .download-row.visible { display: block; }
+      .download-link {
+        display: inline-block;
+        text-decoration: none;
+        background: linear-gradient(135deg, #66d6a8, #7be4b2);
+        color: #09111d;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-weight: 700;
+      }
+      @media (max-width: 880px) {
+        .layout { grid-template-columns: 1fr; }
+        .field-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="topbar">
+        <div class="brand">AI Video Studio</div>
+        <div class="pill">1080p • MP4 • 10 mins</div>
+      </header>
+
+      <div class="layout">
+        <section class="card panel">
+          <h2>Story script</h2>
+          <textarea id="scriptInput" placeholder="Paste a long-form article, script, or narration here..."></textarea>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="voiceSelect">Voice</label>
+              <select id="voiceSelect">
+                <option value="auto">Auto detect</option>
+                <option value="hi-IN-MadhurNeural">Hindi • Madhur Neural</option>
+                <option value="hi-IN-SwaraNeural">Hindi • Swara Neural</option>
+                <option value="en-US-ChristopherNeural">English • Christopher Neural</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="maxSeconds">Max length</label>
+              <input id="maxSeconds" type="number" min="30" max="600" value="600" />
+            </div>
+          </div>
+
+          <div class="actions">
+            <button id="generateBtn">Generate video</button>
+            <button id="splitBtn" class="secondary">Auto-split scenes</button>
+          </div>
+
+          <div id="statusBox" class="status-box"></div>
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </section>
+
+        <aside class="card panel">
+          <h2>Scene editor</h2>
+          <div id="sceneList" class="scene-list"></div>
+          <div id="downloadRow" class="download-row">
+            <a id="downloadLink" class="download-link" href="#" download>Download MP4</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <script src="/frontend/app.js"></script>
+  </body>
+</html>
